@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Skill Extraction & Course Recommendation</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            transition: background-color 0.3s, color 0.3s;
+            margin: 0;
+            padding: 0;
+        }
+    
+        /* Hero Section */
+        .hero {
+            background: radial-gradient(circle at center, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%), 
+                        url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') center/cover;
+            color: white;
+            padding: 100px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .hero h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            line-height: 1.3;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .hero .lead {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        .hero .highlight {
+            color: #ffd700;
+            font-weight: 600;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        .hero .btn-try {
+            background-color: #fff;
+            color: #333;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            margin-top: 20px;
+        }
+        
+        .hero .btn-try:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            background-color: #f5f5f5;
+        }
+    
+        .section {
+            padding: 60px 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+    
+        .highlight {
+            color: #007bff;
+            font-weight: bold;
+        }
+    
+        .team-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+    
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            margin: 20px auto;
+            background-color: #fff;
+            text-align: center;
+            max-width: 600px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+    
+        .btn-try {
+            margin-top: 20px;
+        }
+    
+        /* DARK MODE */
+        .dark-mode {
+            background-color: #121212;
+            color: #f5f5f5;
+        }
+    
+        .dark-mode .hero {
+            background: radial-gradient(circle at center, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.9) 100%),
+                        url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') center/cover;
+        }
+    
+        .dark-mode .section {
+            background-color: #1c1c1c !important;
+            color: #f5f5f5;
+        }
+    
+        .dark-mode .card,
+        .dark-mode .card-header,
+        .dark-mode .accordion-body {
+            background-color: #1f1f1f !important;
+            color: #f5f5f5 !important;
+            border-color: #444;
+        }
+    
+        .dark-mode .accordion-button {
+            background-color: #1f1f1f;
+            color: #f5f5f5;
+        }
+    
+        .dark-mode .accordion-button:not(.collapsed) {
+            background-color: #292929;
+            color: #fff;
+        }
+    
+        .dark-mode .accordion-item {
+            border-color: #444;
+        }
+    
+        .dark-mode .btn,
+        .dark-mode button {
+            background-color: #0d6efd;
+            color: #fff;
+            border-color: #0d6efd;
+        }
+    
+        .dark-mode .btn:hover,
+        .dark-mode button:hover {
+            background-color: #0b5ed7;
+        }
+    
+        .dark-mode .highlight {
+            color: #66b2ff;
+        }
+    
+        .dark-mode .text-warning {
+            color: #ffc107 !important;
+        }
+    
+        .dark-mode a {
+            color: #66b2ff;
+        }
+    
+        .dark-mode .progress-bar {
+            background-color: #007bff;
+        }
+    
+        .dark-mode .navbar-dark {
+            background-color: #1a1a1a !important;
+        }
+    </style>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">COURSE RECOMMENDATION SYSTEM</a>
+            <button class="btn btn-outline-light ms-auto" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Original Content -->
+    <div class="hero" id="intro">
+        <div class="hero-content">
+            <h2>Why Do We Need a Course Recommendation System?</h2>
+            <p class="lead">Learners often struggle to find relevant and high-quality online courses that match their current skillset and learning goals. With thousands of courses available, it becomes overwhelming without proper guidance.</p>
+            <p class="highlight">Our system helps you save time and effort by recommending the right courses based on your resume.</p>
+            <a href="#uploadForm" class="btn btn-try">Try It Now</a>
+        </div>
+    </div>
+
+    <!-- Relevance Section -->
+ <!-- Relevance Section -->
+<!-- Relevance Section -->
+<div class="section" id="relevance" style="background-color: #a9a9a9;">
+    <div class="container">
+        <h2 class="text-center mb-5 white-heading">Why Our System Stands Out</h2>
+        <div class="row g-4">
+            <!-- Card 1 -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm hover-effect card-custom">
+                    <div class="card-body text-center p-4">
+                        <i class="bi bi-person-badge fs-1 text-info mb-3"></i>
+                        <h5>Personalized Learning</h5>
+                        <p>Tailored courses based on <span class="text-info fw-bold">your skills</span>, not generic lists.</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Card 2 -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm hover-effect card-custom">
+                    <div class="card-body text-center p-4">
+                        <i class="bi bi-speedometer2 fs-1 text-success mb-3"></i>
+                        <h5>Save Time</h5>
+                        <p>Skip the guesswork—get <span class="text-success fw-bold">curated recommendations</span> instantly.</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Card 3 -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm hover-effect card-custom">
+                    <div class="card-body text-center p-4">
+                        <i class="bi bi-graph-up fs-1 text-warning mb-3"></i>
+                        <h5>Career Growth</h5>
+                        <p>Bridge skill gaps and <span class="text-warning fw-bold">accelerate</span> your professional journey.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    #relevance .white-heading {
+        color: #ffffff !important; /* Set the heading text color to white */
+        font-weight: 700; /* Make the text bold */
+    }
+
+    .hover-effect {
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .hover-effect:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+    }
+
+    .card-custom {
+        background-color: #fdfdfd;
+        border-radius: 12px;
+        transition: background-color 0.3s ease;
+    }
+
+    .dark-mode #relevance {
+        background-color: #2c2c2c !important;
+    }
+
+    .dark-mode #relevance .card-custom {
+        background-color: #3b3b3b !important;
+        color: #eaeaea;
+        border: 1px solid #4e4e4e;
+    }
+</style>
+
+   <!-- SVG Wave Transition to Team Section -->
+   <svg viewBox="0 0 1440 100" preserveAspectRatio="none" style="display: block;">
+    <path fill="#dce3e8" d="M0,0 C480,100 960,0 1440,100 L1440,0 L0,0 Z"></path>
+</svg>
+</div>
+
+
+
+
+    <!-- Team Section -->
+    <!-- Team Section -->
+<!-- Team Section -->
+<div class="section" id="team" style="background-color: #dce3e8; color: #111;">
+  
+  
+    <div class="container">
+        <h2 class="text-center mb-5">Meet the Team</h2>
+        <div class="row justify-content-center text-center">
+            <!-- Team Member 1 -->
+            <div class="col-md-4 mb-4">
+                <img src="{{ url_for('static', filename='images/abhijith.jpg') }}" alt="S ABHIJITH" class="team-img mb-3">
+                <h5>S ABHIJITH</h5>
+            </div>
+            <!-- Team Member 2 -->
+            <div class="col-md-4 mb-4">
+                <img src="{{ url_for('static', filename='images/abhilash (2).jpg') }}" alt="S ABHILASH" class="team-img mb-3">
+                <h5>S ABHILASH</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    #team .team-img {
+        width: 160px;
+        aspect-ratio: 1/1;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 4px solid #fff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s;
+    }
+
+    #team .team-img:hover {
+        transform: scale(1.05);
+    }
+
+    .dark-mode #team {
+        background-color: #455a64 !important;
+        color: #f5f5f5;
+    }
+
+    .dark-mode #team .team-img {
+        border-color: #ccc;
+    }
+</style>
+
+
+
+    <!-- Service Section (Existing) -->
+    <!-- Upload Section with Enhanced Styling -->
+<div class="upload-section-bg">
+    <div class="upload-card">
+        <div class="card-header">
+            <h1>
+                <i class="bi bi-upload"></i> Upload Your Resume
+            </h1>
+            <p class="lead">Get personalized course recommendations by uploading your resume (PDF format).</p>
+        </div>
+
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="resume" class="form-label">Choose Your Resume (PDF)</label>
+                <input type="file" id="resume" name="resume" accept=".pdf" required class="form-control">
+            </div>
+            <button type="submit" id="uploadButton" class="btn btn-primary btn-lg w-100">
+                <i class="bi bi-send-fill me-2"></i> Upload & Get Recommendations
+            </button>
+        </form>
+
+        <div id="loadingProgressBar" class="progress mt-4" style="display: none;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar" style="width: 100%">Processing...</div>
+        </div>
+
+        <div id="result" class="mt-4"></div>
+    </div>
+</div>
+
+    
+    <style>
+        /* Upload Section Background */
+        .upload-section-bg {
+            position: relative;
+            padding: 100px 20px;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(10, 10, 10, 0.85)),
+                        url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1350&q=80') center/cover no-repeat;
+            background-attachment: fixed;
+        }
+        
+        /* Glassmorphism Card */
+        .upload-card {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px 30px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+            animation: fadeInUp 0.8s ease;
+            color: #222;
+        }
+        
+        /* Animation */
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Header Styling */
+        .upload-card .card-header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .upload-card .card-header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .upload-card .card-header p {
+            font-size: 1rem;
+            color: #555;
+        }
+        
+        /* Input and Button */
+        .upload-card .form-control {
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 1rem;
+            border: 2px solid #ced4da;
+            transition: border-color 0.3s ease;
+        }
+        
+        .upload-card .form-control:focus {
+            border-color: #4e7d9e;
+            box-shadow: 0 0 8px rgba(78, 125, 158, 0.3);
+        }
+        
+        .upload-card .btn-primary {
+            background-color: #4e7d9e;
+            border-color: #4e7d9e;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-card .btn-primary:hover {
+            background-color: #395f7a;
+            border-color: #395f7a;
+        }
+        
+        /* Dark Mode Compatibility */
+        .dark-mode .upload-card {
+            background: rgba(44, 62, 80, 0.9);
+            color: #f0f0f0;
+        }
+        
+        .dark-mode .upload-card .form-control {
+            background-color: #2c3e50;
+            color: #fff;
+            border-color: #555;
+        }
+        
+        .dark-mode .upload-card .btn-primary {
+            background-color: #1abc9c;
+            border-color: #1abc9c;
+        }
+        
+        .dark-mode .upload-card .btn-primary:hover {
+            background-color: #16a085;
+            border-color: #16a085;
+        }
+        
+        .dark-mode .upload-card .card-header p {
+            color: #ddd;
+        }
+        
+    </style>
+    
+
+    <!-- Visit Again Section -->
+    <div class="section bg-dark text-light">
+        <h2>Visit Again</h2>
+        <p class="lead">"The beautiful thing about learning is that nobody can take it away from you." – B.B. King</p>
+        <p>We are constantly improving. Come back to explore even more refined recommendations and features!</p>
+    </div>
+
+    <style>
+        /* Section Background Transitions */
+        #relevance {
+            background-color: #8a9ba8;
+            color: #f5f5f5;
+        }
+    
+        #team {
+            background-color: #bfcad4;
+            color: #111;
+        }
+    
+        .section {
+            padding: 80px 20px 60px;
+            margin: 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+    
+        /* Typography & Titles */
+        .section h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+        }
+    
+        /* Team Circular Images Fix */
+        #team .team-img {
+            width: 160px;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            transition: transform 0.3s ease;
+            background-color: #fff;
+        }
+    
+        #team .team-img:hover {
+            transform: scale(1.05);
+        }
+    
+        #team h5 {
+            margin-top: 15px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+    
+        /* Dark Mode Enhancements */
+        .dark-mode #relevance {
+            background-color: #2c3e50 !important;
+            color: #eaeaea;
+        }
+    
+        .dark-mode #team {
+            background-color: #3e4f5c !important;
+            color: #f5f5f5;
+        }
+    
+        .dark-mode #team .team-img {
+            border-color: #ddd;
+        }
+    </style>
+    
+
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
+        document.getElementById("uploadForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const formData = new FormData();
+            formData.append("resume", document.getElementById("resume").files[0]);
+
+            let uploadButton = document.getElementById("uploadButton");
+            let loadingBar = document.getElementById("loadingProgressBar");
+            let resultDiv = document.getElementById("result");
+
+            uploadButton.disabled = true;
+            loadingBar.style.display = "block";
+            resultDiv.innerHTML = "";
+
+            try {
+                const response = await fetch("/upload", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                loadingBar.style.display = "none";
+                uploadButton.disabled = false;
+
+                if (result.error) {
+                    resultDiv.innerHTML = `<p style="color: red;">Error: ${result.error}</p>`;
+                    return;
+                }
+
+                let skillsHTML = `<h2>Extracted Skills:</h2><p>${result.skills.join(", ")}</p>`;
+
+                let recommendationsHTML = `<h2>Recommended Courses:</h2><div class="accordion" id="courseAccordion">`;
+                result.recommendations.forEach((course, index) => {
+                    let courseId = `course-${index}`;
+                    let stars = "★".repeat(Math.floor(course['Course Rating'])) + "☆".repeat(5 - Math.floor(course['Course Rating']));
+                    recommendationsHTML += `
+                    <div class="accordion-item" id="${courseId}">
+                        <h2 class="accordion-header" id="heading${index}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${index}" aria-expanded="false" aria-controls="collapse${index}">
+                                ${course['Course Name']} <span class="ms-2 text-warning">${stars}</span>
+                            </button>
+                        </h2>
+                        <div id="collapse${index}" class="accordion-collapse collapse" aria-labelledby="heading${index}" data-bs-parent="#courseAccordion">
+                            <div class="accordion-body">
+                                <p><i class="bi bi-book"></i> <strong>Course Name:</strong> ${course['Course Name']}</p>
+                                <p><i class="bi bi-star-fill text-warning"></i> <strong>Rating:</strong> ${course['Course Rating']}</p>
+                                <p><i class="bi bi-card-text"></i> <strong>Description:</strong> ${course['Course Description']}</p>
+                                <p><i class="bi bi-lightbulb"></i> <strong>Matched Skills:</strong> ${course['Matched Skills'].join(", ")}</p>
+                                <a href="${course['Course URL']}" class="btn btn-primary" target="_blank">View Course</a>
+                                <br><br>
+                                <a class="icon-link icon-link-hover" href="#uploadForm">
+                                    Back to Top
+                                    <svg class="bi" aria-hidden="true"><use xlink:href="#arrow-up"></use></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+                recommendationsHTML += `</div>`;
+
+                resultDiv.innerHTML = skillsHTML + recommendationsHTML;
+
+            } catch (error) {
+                loadingBar.style.display = "none";
+                uploadButton.disabled = false;
+                resultDiv.innerHTML = `<p style="color: red;">Error processing request.</p>`;
+                console.error("Upload error:", error);
+            }
+        });
+    </script>
+</body>
+</html>

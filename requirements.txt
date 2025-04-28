@@ -1,0 +1,6 @@
+Flask
+torch
+torch_geometric
+pandas
+networkx
+pdfminer.six
